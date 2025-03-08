@@ -10,10 +10,7 @@
         "tabs",
         "activeTab"
     ],
-    "host_permissions": [
-        "https://*/*",
-        "https://*/*"
-    ],
+    "host_permissions": ["https://www.amazon.com/*"],
     "icons": {
         "32" : "icon32.png"
     }
