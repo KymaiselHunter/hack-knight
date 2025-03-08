@@ -18,9 +18,9 @@ function App() {
 
   const [tabURL, setTabURL] = useState()
   const [productName, setProductName] = useState()
+  const [productDescription, setProductDescription] = useState('');
+  const [productPrice, setProductPrice] = useState('');
   const [isAmazonProductPage, setIsAmazonProductPage] = useState(false);
-
-  //const [productPrice,]
 
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -31,16 +31,37 @@ function App() {
         if (url.includes("amazon.com") && (url.includes("/dp/") || url.includes("/gp/product/"))) {
           setIsAmazonProductPage(true);
 
-          // Run a script inside the Amazon page to get product title
+          // Run a script inside the Amazon page to get product details
           chrome.scripting.executeScript({
             target: { tabId: tabs[0].id },
             func: () => {
-              const titleElement = document.getElementById("productTitle");
-              return titleElement ? titleElement.innerText.trim() : "No product title found";
+              const getText = (selector) => {
+                const el = document.querySelector(selector);
+                return el ? el.innerText.trim() : null;
+              };
+
+              const title = getText("#productTitle") || "No product title found";
+
+              // Try multiple locations for description
+              const description = getText("#productDescription") ||
+                                  getText("#feature-bullets") ||
+                                  getText("#productOverview_feature_div") ||
+                                  "No description available";
+
+              // Get price from different possible locations
+              const price = getText("#priceblock_ourprice") ||
+                            getText("#priceblock_dealprice") ||
+                            getText(".a-price .a-offscreen") ||
+                            "Price not found";
+
+              return { title, description, price};
             }
           }, (results) => {
             if (results && results[0] && results[0].result) {
-              setProductName(results[0].result);
+              setProductName(results[0].result.title);
+              setProductDescription(results[0].result.description);
+              setProductPrice(results[0].result.price);
+              setAsin(results[0].result.asin);
             }
           });
 
@@ -65,7 +86,7 @@ function App() {
       <h1>test {isAmazonProductPage ? "product" : "not product"}</h1>
       {isAmazonProductPage && 
       <ul>
-        {[productName, productName, productName].map((item, index) => (
+        {[productName, productDescription, productPrice].map((item, index) => (
           <li key={index}>{item}</li>
         ))}
       </ul>
