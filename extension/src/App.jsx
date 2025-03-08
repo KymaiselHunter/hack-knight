@@ -71,6 +71,34 @@ function App() {
       }
     });
   }, []);
+
+  async function callGPT() {
+    try {
+      // The user’s prompt (could come from an input field in your popup)
+      const userPrompt = 'Hello, GPT from Chrome extension!';
+  
+      const response = await fetch('http://localhost:3001/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userPrompt })
+      });
+  
+      const data = await response.json();
+      if (data.aiResponse) {
+        console.log('AI response:', data.aiResponse);
+        setChatResponse(data.aiResponse)
+        // Use data.aiResponse in your UI
+      } else {
+        console.error('Error from server:', data.error);
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+    }
+  }
+
+  const [chatRespose, setChatResponse] = useState("No GPT")
   
   return (
     <>
@@ -83,6 +111,7 @@ function App() {
         </a>
       </div>
       <h1>Vite + React</h1>
+      <h1>{chatRespose}</h1>
       <h1>test {isAmazonProductPage ? "product" : "not product"}</h1>
       {isAmazonProductPage && 
       <ul>
@@ -95,7 +124,7 @@ function App() {
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
-        <button onClick={colorButton}>
+        <button onClick={callGPT}>
           count is {count}
         </button>
         <p>
