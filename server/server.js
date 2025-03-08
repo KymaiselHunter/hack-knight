@@ -52,7 +52,7 @@ app.post('/api/chat', async (req, res) => {
         { role: 'user', content: userPrompt }
       ],
     });
-    res.json({ aiResponse: response.data.choices[0].message.content });
+    res.json({ aiResponse: response.choices[0].message.content });
     //console.log(chatCompletion.choices[0].message);
   } catch (error) {
     //console.error('Error creating chat completion:', error);
