@@ -1,58 +1,81 @@
-// 1) Load environment variables from .env into process.env
-require('dotenv').config(); 
+//import dotenv from 'dotenv';
+//import OpenAI from 'openai';
 
-// 2) Import the Express library for creating HTTP endpoints
+
+// server.js
+//dotenv.config();
+require('dotenv').config();
+const OpenAI = require('openai');
+
 const express = require('express');
-
-// 3) Import cors (Cross-Origin Resource Sharing) to allow requests from your extension
 const cors = require('cors');
+//const { Configuration, OpenAIApi } = require('openai');
+const OpenAI_Api = process.env.OPENAI_API_KEY || 'Mykey';
 
-// 4) Import the older usage of the openai library
-const openai = require('openai');
+const openai = new OpenAI({
+  apiKey: OpenAI_Api
+});
 
-// 5) Create an Express application
+
 const app = express();
-
-// 6) Apply the cors middleware so we can accept requests from different origins (like your Chrome extension)
 app.use(cors());
-
-// 7) Parse JSON request bodies automatically
 app.use(express.json());
 
-// 8) Set the API key from your .env file
-openai.apiKey = process.env.OPENAI_API_KEY;
+//const configuration = new Configuration({
+//  apiKey: process.env.OPENAI_API_KEY,
+//});
+//const openai = new OpenAIApi(configuration);
 
-// 9) Define a POST endpoint at /api/chat for AI requests
+//app.post('/api/chat', async (req, res) => {
+//  try {
+//    const { userPrompt } = req.body;
+//    const response = await openai.createChatCompletion({
+//      model: 'gpt-3.5-turbo',
+//      messages: [
+//        { role: 'system', content: 'You are a helpful assistant.' },
+//        { role: 'user', content: userPrompt }
+//      ],
+//    });
+//    res.json({ aiResponse: response.data.choices[0].message.content });
+//  } catch (error) {
+//    console.error(error);
+//    res.status(500).json({ error: error.message });
+//  }
+//});
 app.post('/api/chat', async (req, res) => {
   try {
-    // 9a) Extract "userPrompt" from the incoming JSON body
-    const { userPrompt } = req.body;
-
-    // 9b) Use the openai library to call ChatCompletion (ChatGPT style)
-    const response = await openai.ChatCompletion.create({
+      const { userPrompt } = req.body;
+      const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
         { role: 'system', content: 'You are a helpful assistant.' },
         { role: 'user', content: userPrompt }
       ],
     });
-
-    // 9c) Extract the AI's text response
-    const aiMessage = response.choices[0].message.content;
-
-    // 9d) Send it back to the caller as JSON
-    res.json({ aiResponse: aiMessage });
+    res.json({ aiResponse: response.data.choices[0].message.content });
+    //console.log(chatCompletion.choices[0].message);
   } catch (error) {
-    // 9e) On any error, log it and return an error message
-    console.error(error);
+    //console.error('Error creating chat completion:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// 10) Choose a port from .env or default to 3001
-const PORT = process.env.PORT || 3001;
+//const createChatCompletion = async () => {
+//  try {
+//    const chatCompletion = await openai.chat.completions.create({
+//      model: 'gpt-3.5-turbo',
+//      messages: [
+//        { role: 'system', content: 'You are a helpful assistant.' },
+//        { role: 'user', content: userPrompt }
+//      ],
+//    });
+//    console.log(chatCompletion.choices[0].message);
+//  } catch (error) {
+//    console.error('Error creating chat completion:', error);
+//  }
+//};
 
-// 11) Start the server listening
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+//createChatCompletion();
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log('Server listening on ' + PORT));
