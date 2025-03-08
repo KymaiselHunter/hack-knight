@@ -1,0 +1,11 @@
+{
+  "name": "extension-server",
+  "version": "1.0.0",
+  "description": "Backend for making calls to an AI chatbot and grab data from a banking API",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kyle B., Nusy. I and Frank G.",
+  "license": "ISC"
+}
