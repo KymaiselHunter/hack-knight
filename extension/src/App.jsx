@@ -61,7 +61,6 @@ function App() {
               setProductName(results[0].result.title);
               setProductDescription(results[0].result.description);
               setProductPrice(results[0].result.price);
-              setAsin(results[0].result.asin);
             }
           });
 
@@ -98,35 +97,27 @@ function App() {
     }
   }
 
-  const [chatRespose, setChatResponse] = useState("No GPT")
+  const [chatResponse, setChatResponse] = useState("No GPT")
   
   return (
     <>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <ChatBot chatResponse={chatResponse}></ChatBot>
       </div>
-      <h1>Vite + React</h1>
-      <h1>{chatRespose}</h1>
-      <h1>test {isAmazonProductPage ? "product" : "not product"}</h1>
-      {isAmazonProductPage && 
-      <ul>
-        {[productName, productDescription, productPrice].map((item, index) => (
-          <li key={index}>{item}</li>
-        ))}
-      </ul>
-  }    
+      <h1>======</h1>
+
+      <button onClick={callGPT}>
+        activate gpt
+      </button>
+
+      <AmazonItem 
+        isAmazonProductPage={isAmazonProductPage}
+        productName={productName} 
+        productDescription={productDescription} 
+        productPrice={productPrice}>
+      </AmazonItem>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <button onClick={callGPT}>
-          count is {count}
-        </button>
+
         <p>
           Edit <code>src/App.jsx</code> and save to test HMR
         </p>
@@ -136,6 +127,32 @@ function App() {
       </p>
     </>
   )
+}
+
+function ChatBot(props)
+{
+  return(
+    <>
+       <h1>{props.chatResponse}</h1>
+    </>
+  )
+}
+
+function AmazonItem(props)
+{
+  const productMessage = 
+  <>
+    <h1>product detected</h1>
+    <ul>
+      {[props.productName, props.productDescription, props.productPrice].map((item, index) => (
+        <li key={index}>{item}</li>
+      ))}
+    </ul>
+  
+  </>
+
+  const noProductMessage = <h1>no product detected</h1>
+  return(props.isAmazonProductPage ? productMessage : noProductMessage )
 }
 
 export default App
