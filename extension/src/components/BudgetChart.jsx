@@ -2,13 +2,8 @@ import React, { useEffect, useState } from "react";
 import ProgressBar from "./ProgressBar";
 import DataRow from "./DataRow";
 
-const BudgetProgress = () => {
-  const [paycheck, setPaycheck] = useState({
-    firstName: "",
-    lastName: "",
-    address: "",
-    paycheckAmount: ""
-  });
+const BudgetProgress = (props) => {
+  const paycheck = props.currentTotalDeposit
 
 
   // Calculate amounts
@@ -17,9 +12,9 @@ const BudgetProgress = () => {
   const suggestedSavings = (paycheck * 0.2).toFixed(2); // 20% of paycheck
 
   // Calculate spent and remaining for Essential and Non-Essential Budgets
-  const spentEssential = (essentialBudget * 1.1).toFixed(2); // Spent 40% of Essential Budget
+  const spentEssential = (essentialBudget * props.spentNeeds).toFixed(2); // Spent 40% of Essential Budget
   const remainingEssential = (essentialBudget - spentEssential).toFixed(2);
-  const spentNonEssential = (nonEssentialBudget * 0.7).toFixed(2); // Spent 40% of Non-Essential Budget
+  const spentNonEssential = (nonEssentialBudget * props.spentWants).toFixed(2); // Spent 40% of Non-Essential Budget
   const remainingNonEssential = (nonEssentialBudget - spentNonEssential).toFixed(2);
 
   // Calculate actual savings
