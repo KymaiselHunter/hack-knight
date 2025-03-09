@@ -90,7 +90,7 @@ function App() {
     }
   }
 
-
+  const [currentCustomer, setCurrentCustomer] = useState("67cb4ca29683f20dd518d06c")
   const [customersData, setCustomersData] = useState([])
 
   async function callNessieCustomers() {
@@ -113,13 +113,76 @@ function App() {
       console.error('Fetch error:', err);
     }
   } 
+
+  const [currentAccounts, setCurrentAccounts] = useState([])
+
+  async function callNessieAccounts(userID) {
+    try {
+      // Make sure you pass the ID in the URL, no body needed for a GET
+      const response = await fetch(`http://localhost:3001/api/nessie/customers/${userID}/accounts`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      // If the server responded with an error (e.g., 500), handle it
+      if (!response.ok) {
+        console.error('Server error:', response.status, response.statusText);
+        return;
+      }
+
+      const data = await response.json();
+      if (data.accounts) {
+        console.log('Accounts data:', data.accounts);
+        setCurrentAccounts(data.accounts);
+      } else {
+        console.error('No data returned from Nessie endpoint.');
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+    }
+  }
+  
+  
+    const [currentDeposits, setCurrentDeposits] = useState([])
+  
+    async function callNessieDeposits(accountID) {
+      try {
+        // Make sure you pass the ID in the URL, no body needed for a GET
+        const response = await fetch(`http://localhost:3001/api/nessie/accounts/${accountID}/deposits`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+  
+        // If the server responded with an error (e.g., 500), handle it
+        if (!response.ok) {
+          console.error('Server error:', response.status, response.statusText);
+          return;
+        }
+  
+        const data = await response.json();
+        if (data.deposits) {
+          console.log('Deposits data:', data.deposits);
+          //setCurrentDeposits(data.deposits);
+        } else {
+          console.error('No data returned from Nessie endpoint.');
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+      }
+    }
   
   return (
     <>
     
           <BudgetProgress />
       <div>
-        <button onClick={callNessieCustomers}></button>
+        <button onClick={()=>callNessieCustomers()}></button>
+        <button onClick={()=>callNessieAccounts("67cb4ca29683f20dd518d06c")}></button>
+        <button onClick={()=>callNessieDeposits("67cb5dd99683f20dd518d13b")}></button>
       </div>
       <div>
         <ChatBot chatResponse={chatResponse}></ChatBot>

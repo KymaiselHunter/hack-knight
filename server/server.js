@@ -42,12 +42,11 @@ app.post('/api/chat', async (req, res) => {
 const nessieApiKey = process.env.NESSIE_API_KEY;
 const nessieBaseUrl = 'http://api.nessieisreal.com';
 
-//Nessie posts
+//Nessie Gets
 // Route to fetch account data from the Nessie API
 app.get('/api/nessie/customers', async (req, res) => {
   try {
     // Build the URL with your API key as a query parameter
-    //console.log("d")
     const url = `${nessieBaseUrl}/customers?key=${nessieApiKey}`;
     // Use node-fetch to send a GET request to the Nessie API endpoint
     const response = await fetch(url);
@@ -57,6 +56,61 @@ app.get('/api/nessie/customers', async (req, res) => {
     res.json({customers: data});
   } catch (error) {
     // Handle any errors that occur during the fetch operation
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/nessie/customers/:id/accounts
+app.get('/api/nessie/customers/:id/accounts', async (req, res) => {
+  try {
+    // Extract the customer ID from the route parameters
+    const userID = req.params.id;
+
+    // Build the Nessie URL with your API key
+    // e.g., https://api.nessieisreal.com/customers/{id}/accounts?key=YOUR_KEY
+    const url = `${nessieBaseUrl}/customers/${userID}/accounts?key=${nessieApiKey}`;
+
+    // Fetch the accounts data from Nessie
+    const response = await fetch(url);
+    
+    // If the remote service returned a non-2xx status, throw an error
+    if (!response.ok) {
+      throw new Error(`Nessie API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    // Return the fetched accounts data to the client
+    res.json({ accounts: data });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+// GET /api/nessie/customers/:id/accounts
+app.get('/api/nessie/accounts/:id/deposits', async (req, res) => {
+  try {
+    // Extract the customer ID from the route parameters
+    const accountID = req.params.id;
+
+    // Build the Nessie URL with your API key
+    // e.g., https://api.nessieisreal.com/customers/{id}/accounts?key=YOUR_KEY
+    const url = `${nessieBaseUrl}/accounts/${accountID}/deposits?key=${nessieApiKey}`;
+
+    // Fetch the accounts data from Nessie
+    const response = await fetch(url);
+    
+    // If the remote service returned a non-2xx status, throw an error
+    if (!response.ok) {
+      throw new Error(`Nessie API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    // Return the fetched accounts data to the client
+    res.json({ deposits: data });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
