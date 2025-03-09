@@ -28,9 +28,19 @@ function App() {
 
   // const [allCustomers, setAllCustomers] = useState([]);
 
-
+  
   // Chrome extension: get Amazon product details
   useEffect(() => {
+    if(currentCustomer == null)
+    {
+      grabNewCustomer("67cb4ca29683f20dd518d06c")
+      console.log('Customer:', currentCustomer);
+      console.log('Accounts:', currentAccounts);
+      console.log('Total deposits:', currentTotalDeposit);
+      console.log('Spent (needs):', spentNeeds);
+      console.log('Spent (wants):', spentWants);
+      console.log('Saved:', currentSaved);
+    }
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length > 0) {
         const url = tabs[0].url;
@@ -62,6 +72,7 @@ function App() {
               setProductName(results[0].result.title);
               setProductDescription(results[0].result.description);
               setProductPrice(results[0].result.price);
+              callGPT();
             }
           });
         } else {
@@ -70,6 +81,12 @@ function App() {
       }
     });
   }, []);
+  
+  
+  useEffect(() => {
+    callGPT();
+  }, [currentCustomer]);
+  
 
   // --- GPT Function ---
   async function callGPT() {
@@ -276,15 +293,8 @@ function App() {
         </button>
       </div>
       <div>
-        <ChatBot chatResponse={chatResponse} />
+        <ChatBot chatResponse={chatResponse}></ChatBot>
       </div>
-      <h1>======</h1>
-      <button onClick={callGPT}>
-        activate gpt
-      </button>
-
-      {/* <CustomerList customers={allCustomers} onSelectCustomer={grabNewCustomer} /> */}
-
     </>
   );
 }
