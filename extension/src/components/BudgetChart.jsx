@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaThumbsUp, FaThumbsDown } from "react-icons/fa"; // Import Font Awesome icons
 
-const API_KEY = ""; // Replace with your Nessie API Key
+const API_KEY = "f16bc2e1472450db774a644673f06a3f"; // Replace with your Nessie API Key
 
 const data = [
   { 
@@ -17,137 +17,13 @@ const data = [
 ];
 
 const BudgetProgress = () => {
-  const [paycheck, setPaycheck] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
+  const [paycheck, setPaycheck] = useState({
     firstName: "",
     lastName: "",
     address: "",
     paycheckAmount: ""
   });
 
-  useEffect(() => {
-    const savedCustomer = JSON.parse(localStorage.getItem("customer"));
-    if (savedCustomer) {
-      setFormData(savedCustomer);
-      setPaycheck(savedCustomer.paycheckAmount);
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
-  }, []);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const depositPaycheck = async (amount) => {
-    try {
-      const response = await fetch("YOUR_BACKEND_API_ENDPOINT/deposit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paycheck: amount }),
-      });
-
-      if (response.ok) {
-        console.log("Paycheck deposited successfully");
-      } else {
-        console.error("Failed to deposit paycheck");
-      }
-    } catch (error) {
-      console.error("Error depositing paycheck:", error);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch(
-        `http://api.nessieisreal.com/customers?key=${API_KEY}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            address: { street_number: formData.address },
-          }),
-        }
-      );
-      const customer = await response.json();
-      alert("Customer created successfully!");
-
-      const customerData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        address: formData.address,
-        paycheckAmount: parseFloat(formData.paycheckAmount),
-      };
-
-      localStorage.setItem("customer", JSON.stringify(customerData));
-
-      setPaycheck(parseFloat(formData.paycheckAmount));
-      depositPaycheck(parseFloat(formData.paycheckAmount));
-      setShowForm(false);
-    } catch (error) {
-      console.error("Failed to create customer:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (paycheck > 0) {
-      setLoading(false);
-    }
-  }, [paycheck]);
-
-  if (loading) {
-    return (
-      <div>
-        <div>Loading paycheck...</div>
-        <button onClick={() => setShowForm(true)}>Create Customer</button>
-
-        {showForm && (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <input
-              type="text"
-              name="firstName"
-              placeholder="First Name"
-              value={formData.firstName}
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type="text"
-              name="lastName"
-              placeholder="Last Name"
-              value={formData.lastName}
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type="text"
-              name="address"
-              placeholder="Address"
-              value={formData.address}
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type="number"
-              name="paycheckAmount"
-              placeholder="Last Paycheck Amount"
-              value={formData.paycheckAmount}
-              onChange={handleInputChange}
-              required
-            />
-            <button type="submit">Submit</button>
-          </form>
-        )}
-      </div>
-    );
-  }
 
   // Calculate amounts
   const essentialBudget = (paycheck * 0.5).toFixed(2); // 50% of paycheck
@@ -270,27 +146,30 @@ const BudgetProgress = () => {
       })}
   
       {/* Display Suggested Savings */}
-      <div style={{ marginBottom: "20px", fontSize: "16px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>Suggested Savings</span>
-          <span style={{ color: "#42c982" }}>
-            ${parseFloat(suggestedSavings).toLocaleString()}
-          </span>
-        </div>
-      </div>
+      <div style={{ marginBottom: "20px" }}>
+        <DataRow title={"Suggested Savings"} money={suggestedSavings}></DataRow>
+      </div>  
   
       {/* Display Actual Savings */}
       <div style={{ fontSize: "16px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>Actual Savings</span>
-          <span style={{ color: actualSavingsColor }}>
-            ${parseFloat(actualSavings).toLocaleString()}
-          </span>
-        </div>
+        <DataRow title={"Actual Savings"} money={actualSavings}></DataRow>
       </div>
     </div>
   );
-  
 };
 
+function DataRow(props)
+{
+  return(
+    <>
+      <div style={{ display: "flex", justifyContent: "space-between",fontSize: "16px" }}>
+          <span>{props.title}</span>
+          <span style={{ color: "#42c982" }}>
+            ${parseFloat(props.money).toLocaleString()}
+          </span>
+        </div>
+    </>
+
+  )
+}
 export default BudgetProgress;
