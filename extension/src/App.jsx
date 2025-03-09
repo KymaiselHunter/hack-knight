@@ -286,15 +286,11 @@ function App() {
   // --- UI Rendering ---
   return (
     <>
-      <BudgetProgress />
-      <div>
-        <button onClick={() => grabNewCustomer("67cb4ca29683f20dd518d06c")}>
-          Test Grab New Customer
-        </button>
-      </div>
+      <BudgetProgress currentTotalDeposit={currentTotalDeposit} spentNeeds={spentNeeds} spentWants={spentWants} />
       <div>
         <ChatBot chatResponse={chatResponse}></ChatBot>
       </div>
+
     </>
   );
 }
@@ -330,7 +326,7 @@ function App() {
 function ChatBot(props) {
   return (
     <>
-      <h1>{props.chatResponse}</h1>
+      <p>{props.chatResponse}</p>
     </>
   );
 }
