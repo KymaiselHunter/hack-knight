@@ -5,8 +5,6 @@ const OpenAI = require('openai');
 const express = require('express');
 const cors = require('cors');
 
-const fetch = require('node-fetch'); // This module lets Node.js make HTTP requests
-
 //set up express
 const app = express();
 app.use(cors());
@@ -37,84 +35,28 @@ app.post('/api/chat', async (req, res) => {
 });
 
 
-
-//Nessie Key
-const nessieApiKey = process.env.NESSIE_API_KEY;
-const nessieBaseUrl = 'http://api.nessieisreal.com';
-
-//Nessie posts
-// Route to fetch account data from the Nessie API
+//TEMP MOCK CUSTOMER DATA
 app.get('/api/nessie/customers', async (req, res) => {
   try {
-    // Build the URL with your API key as a query parameter
-    //console.log("d")
-    const url = `${nessieBaseUrl}/customers?key=${nessieApiKey}`;
-    // Use node-fetch to send a GET request to the Nessie API endpoint
-    const response = await fetch(url);
-    const data = await response.json();
+    // Mock customer data since Nessie API has no data
+    const mockCustomerData = [
+      {
+        firstName: 'John',
+        lastName: 'Doe',
+        paycheck: 2000,
+        essentialBudget: 1000,
+        nonEssentialBudget: 600,
+        spentEssential: 700,
+        spentNonEssential: 300
+      }
+    ];
 
-    // Return the fetched data to the client
-    res.json({customers: data});
+    // Return mock data
+    res.json({ customers: mockCustomerData });
   } catch (error) {
-    // Handle any errors that occur during the fetch operation
     res.status(500).json({ error: error.message });
   }
 });
 
-
-
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log('Server listening on ' + PORT));
-
-
-////Kyle's reference code
-//// A map of "assistantStyle" => system messages
-//const systemMessages = {
-//  default: 'You are a helpful assistant.',
-//  british: 'You are a helpful British assistant.',
-//  // ...
-//};
-
-//app.post('/api/chat', async (req, res) => {
-//  try {
-//    const { userPrompt, assistantStyle } = req.body;
-
-//    // If assistantStyle is not recognized, default to "default" or throw an error
-//    const systemMessage = systemMessages[assistantStyle] || systemMessages.default;
-
-//    const response = await openai.chat.completions.create({
-//      model: 'gpt-3.5-turbo',
-//      messages: [
-//        { role: 'system', content: systemMessage },
-//        { role: 'user', content: userPrompt }
-//      ],
-//    });
-
-//    res.json({ aiResponse: response.choices[0].message.content });
-//  } catch (error) {
-//    res.status(500).json({ error: error.message });
-//  }
-//});
-
-//async function callGPT(userPrompt, assistantStyle = 'default') {
-//  try {
-//    const response = await fetch('http://localhost:3001/api/chat', {
-//      method: 'POST',
-//      headers: {
-//        'Content-Type': 'application/json'
-//      },
-//      body: JSON.stringify({ userPrompt, assistantStyle })
-//    });
-
-//    const data = await response.json();
-//    if (data.aiResponse) {
-//      console.log('AI response:', data.aiResponse);
-//      // Optionally update your UI with the received response:
-//      setChatResponse(data.aiResponse);
-//    } else {
-//      console.error('Error from server:', data.error);
-//    }
-//  } catch (err) {
-//    console.error('Fetch error:', err);
-//  }
-//}
