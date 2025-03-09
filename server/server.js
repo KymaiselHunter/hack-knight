@@ -87,6 +87,34 @@ app.get('/api/nessie/customers/:id/accounts', async (req, res) => {
   }
 });
 
+// GET /api/nessie/customers/:id
+app.get('/api/nessie/customers/:id', async (req, res) => {
+  try {
+    // Extract the customer ID from the route parameters
+    const customerID = req.params.id;
+
+    // Build the Nessie URL (e.g., https://api.nessieisreal.com/customers/{id}?key=YOUR_KEY)
+    const url = `${nessieBaseUrl}/customers/${customerID}?key=${nessieApiKey}`;
+
+    // Fetch the customer data from Nessie
+    const response = await fetch(url);
+
+    // If the remote service returned a non-2xx status, throw an error
+    if (!response.ok) {
+      throw new Error(`Nessie API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    // Parse the JSON response from Nessie
+    const data = await response.json();
+
+    // Return the fetched customer data to the client
+    res.json({ customer: data });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 
 // GET /api/nessie/customers/:id/accounts
 app.get('/api/nessie/accounts/:id/deposits', async (req, res) => {
