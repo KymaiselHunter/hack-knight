@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaThumbsUp, FaThumbsDown } from "react-icons/fa"; // Import Font Awesome icons
-
-const API_KEY = "f16bc2e1472450db774a644673f06a3f"; // Replace with your Nessie API Key
+import Thumb from "./Thumb.jsx"
 
 const data = [
   { 
@@ -92,33 +90,16 @@ function DataRow(props)
   )
 }
 
-function Thumb(props)
-{
-  // // Determine if thumbs up or thumbs down should be shown
-  if(props.spent > props.budget)
-  {
-    const iconStyle = {
-      color: "green",
-      fontSize: "20px",
-      position: "relative",
-      top: "-25px", // Adjust for alignment
-    };
-    return <FaThumbsUp style={iconStyle} />;
-  }
-  else
-  {
-    const iconStyle = {
-      color: "red",
-      fontSize: "20px",
-      position: "relative",
-      top: "-25px", // Adjust for alignment
-    };
-    return <FaThumbsDown style={iconStyle} />;
-  }
-}
 
 function ProgressBar(props)
 {
+  //category={data[1].category} 
+  //spent={spentNonEssential} 
+  //totalAmount={nonEssentialBudget}
+  //color={data[1].color}
+  //remaining={remainingNonEssential}  
+
+
   // Calculate progress bar width for spent and remaining
   const getProgressWidth = (spent, budget) => {
     return (spent / budget) * 100; // Calculate percentage of spent amount
