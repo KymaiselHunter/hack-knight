@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
 import BudgetProgress from './components/BudgetChart';
 import './App.css';
 
 function App() {
-  // Amazon product state
   const [tabURL, setTabURL] = useState();
   const [productName, setProductName] = useState();
   const [productDescription, setProductDescription] = useState('');
@@ -13,7 +10,7 @@ function App() {
   const [isAmazonProductPage, setIsAmazonProductPage] = useState(false);
 
   // GPT state
-  const [chatResponse, setChatResponse] = useState("No GPT");
+  // const [chatResponse, setChatResponse] = useState("No GPT");
 
   // Nessie state
   const [currentCustomer, setCurrentCustomer] = useState(null);
@@ -27,6 +24,9 @@ function App() {
 
 
   // Chrome extension: get Amazon product details
+  const [chatResponse, setChatResponse] = useState("Loading GPT Advice...");
+  const [customersData, setCustomersData] = useState([]);
+
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length > 0) {
@@ -59,6 +59,13 @@ function App() {
               setProductName(results[0].result.title);
               setProductDescription(results[0].result.description);
               setProductPrice(results[0].result.price);
+
+              // Automatically call GPT once product is found
+              // callNessieCustomers().then(customer => {
+                if (customer) {
+                  callGPT(results[0].result.title, results[0].result.description, results[0].result.price, customer);
+                }
+              // });
             }
           });
         } else {
@@ -68,10 +75,16 @@ function App() {
     });
   }, []);
 
-  // --- GPT Function ---
-  async function callGPT() {
+  async function callGPT(productName, productDescription, productPrice, customer) {
+    const { paycheck, essentialBudget, nonEssentialBudget, spentEssential, spentNonEssential} = customer;
+
+    const userPrompt = `I make ${paycheck} per month. I found a product called '${productName}' on Amazon costing ${productPrice}. The description says: '${productDescription}'.
+      Here's my budget breakdown:
+      - Essential Budget: ${essentialBudget} (Spent: ${spentEssential})
+      - Non-Essential Budget: ${nonEssentialBudget} (Spent: ${spentNonEssential})
+      Is this an essential item or not? Should I buy this based on my budget? Please give a short answer (max 4 sentences)`;
+
     try {
-      const userPrompt = 'Hello, GPT from Chrome extension!';
       const response = await fetch('http://localhost:3001/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -299,10 +312,12 @@ function CustomerList({ customers, onSelectCustomer }) {
 }
 
 
+
 function ChatBot(props) {
   return (
     <>
-      <h1>{props.chatResponse}</h1>
+      <h2>AI Advisory</h2>
+      <p>{props.chatResponse}</p>
     </>
   );
 }
