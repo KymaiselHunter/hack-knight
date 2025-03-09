@@ -22,8 +22,11 @@ function App() {
   const [currentSaved, setCurrentSaved] = useState(0);
   const [spentNeeds, setSpentNeeds] = useState(0);
   const [spentWants, setSpentWants] = useState(0);
+  
+  const [essentialBudget, setEssentialBudget] = useState(0);
+  const [nonEssentialBudget, setNonEssentialBudget] = useState(0);
 
-  const [allCustomers, setAllCustomers] = useState([]);
+  // const [allCustomers, setAllCustomers] = useState([]);
 
 
   // Chrome extension: get Amazon product details
@@ -70,13 +73,19 @@ function App() {
 
   // --- GPT Function ---
   async function callGPT() {
+    const userPrompt = `I make ${currentTotalDeposit} per month. I found a product called '${productName}' on Amazon costing ${productPrice}. The description says: '${productDescription}'.
+      Here's my budget breakdown:
+      - Essential Budget: ${essentialBudget} (Spent: ${spentNeeds})
+      - Non-Essential Budget: ${nonEssentialBudget} (Spent: ${spentWants})
+      Is this an essential item or not? Should I buy this based on my budget? Please give a short answer (max 4 sentences)`;
+
     try {
-      const userPrompt = 'Hello, GPT from Chrome extension!';
       const response = await fetch('http://localhost:3001/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userPrompt })
       });
+
       const data = await response.json();
       if (data.aiResponse) {
         console.log('AI response:', data.aiResponse);
@@ -183,11 +192,14 @@ function App() {
     setSpentWants(0);
     setCurrentAccounts([]);
     setCurrentCustomer(null);
+
+    setEssentialBudget(0)
+    setNonEssentialBudget(0)
   }
 
   // --- Master function: fetch customer info, accounts, deposits & purchases, then calculate totals ---
   async function grabNewCustomer(customerID) {
-    try {
+    try { 
       resetCustomerData();
 
       // 1. Fetch the customer and accounts
@@ -221,6 +233,9 @@ function App() {
       // 4. Calculate the "saved" amount (total deposits minus total purchases)
       const saved = totalDeposits - totalPurchases;
 
+      const eb = totalDeposits *.5
+      const neb = totalDeposits * .3
+
       // 5. Update React state once with all the data
       setCurrentCustomer(customer);
       setCurrentAccounts(accounts);
@@ -228,6 +243,9 @@ function App() {
       setCurrentSaved(saved);
       setSpentNeeds(totalSpentNeeds);
       setSpentWants(totalSpentWants);
+
+      setEssentialBudget(eb)
+      setNonEssentialBudget(neb)
 
       console.log('Customer:', customer);
       console.log('Accounts:', accounts);
@@ -240,13 +258,13 @@ function App() {
     }
   }
 
-  useEffect(() => {
-    async function loadCustomers() {
-      const customers = await getNessieCustomers();  // Assuming getNessieCustomers() is defined and returns an array
-      setAllCustomers(customers);
-    }
-    loadCustomers();
-  }, []);
+  // useEffect(() => {
+  //   async function loadCustomers() {
+  //     const customers = await getNessieCustomers();  // Assuming getNessieCustomers() is defined and returns an array
+  //     setAllCustomers(customers);
+  //   }
+  //   loadCustomers();
+  // }, []);
 
   // --- UI Rendering ---
   return (
@@ -265,38 +283,38 @@ function App() {
         activate gpt
       </button>
 
-      <CustomerList customers={allCustomers} onSelectCustomer={grabNewCustomer} />
+      {/* <CustomerList customers={allCustomers} onSelectCustomer={grabNewCustomer} /> */}
 
     </>
   );
 }
 
-// New CustomerList component
-function CustomerList({ customers, onSelectCustomer }) {
-  return (
-    <div style={{ margin: '20px 0' }}>
-      <h2>Customers</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {customers.map(customer => (
-          <div
-            key={customer._id}
-            style={{
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              padding: '8px',
-              cursor: 'pointer',
-              width: '100%',
-              //backgroundColor: '#f9f9f9'
-            }}
-            onClick={() => onSelectCustomer(customer._id)}
-          >
-            {customer.name}dssgfs
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+// // New CustomerList component
+// function CustomerList({ customers, onSelectCustomer }) {
+//   return (
+//     <div style={{ margin: '20px 0' }}>
+//       <h2>Customers</h2>
+//       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+//         {customers.map(customer => (
+//           <div
+//             key={customer._id}
+//             style={{
+//               border: '1px solid #ccc',
+//               borderRadius: '4px',
+//               padding: '8px',
+//               cursor: 'pointer',
+//               width: '100%',
+//               //backgroundColor: '#f9f9f9'
+//             }}
+//             onClick={() => onSelectCustomer(customer._id)}
+//           >
+//             {customer.name}dssgfs
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }
 
 
 function ChatBot(props) {
