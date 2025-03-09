@@ -138,7 +138,7 @@ const BudgetProgress = () => {
   
               {/* Align thumbs icon */}
               <div style={{ marginLeft: "10px", alignSelf: "center" }}>
-                {getThumbsIcon(parseFloat(spent), parseFloat(totalAmount))}
+                <Thumb spent={spent} budget={totalAmount}/>
               </div>
             </div>
           </div>
@@ -171,5 +171,30 @@ function DataRow(props)
     </>
 
   )
+}
+
+function Thumb(props)
+{
+  // // Determine if thumbs up or thumbs down should be shown
+  if(props.spent > props.budget)
+  {
+    const iconStyle = {
+      color: "green",
+      fontSize: "20px",
+      position: "relative",
+      top: "-25px", // Adjust for alignment
+    };
+    return <FaThumbsDown style={iconStyle} />;
+  }
+  else
+  {
+    const iconStyle = {
+      color: "red",
+      fontSize: "20px",
+      position: "relative",
+      top: "-25px", // Adjust for alignment
+    };
+    return <FaThumbsDown style={iconStyle} />;
+  }
 }
 export default BudgetProgress;
