@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+
+
+import BudgetProgress from './components/BudgetChart';
+
 import './App.css'
 
 function App() {
@@ -112,6 +116,8 @@ function App() {
   
   return (
     <>
+    
+          <BudgetProgress />
       <div>
         <button onClick={callNessieCustomers}></button>
       </div>
@@ -184,3 +190,4 @@ export default App
 //    }
 //  });
 //}
+
