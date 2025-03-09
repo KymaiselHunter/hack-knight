@@ -17,68 +17,13 @@ const data = [
 ];
 
 const BudgetProgress = () => {
-  const [paycheck, setPaycheck] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
+  const [paycheck, setPaycheck] = useState({
     firstName: "",
     lastName: "",
     address: "",
     paycheckAmount: ""
   });
 
-  useEffect(() => {
-    if (paycheck > 0) {
-      setLoading(false);
-    }
-  }, [paycheck]);
-
-  if (loading) {
-    return (
-      <div>
-        <div>Loading paycheck...</div>
-        <button onClick={() => setShowForm(true)}>Create Customer</button>
-
-        {showForm && (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <input
-              type="text"
-              name="firstName"
-              placeholder="First Name"
-              value={formData.firstName}
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type="text"
-              name="lastName"
-              placeholder="Last Name"
-              value={formData.lastName}
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type="text"
-              name="address"
-              placeholder="Address"
-              value={formData.address}
-              onChange={handleInputChange}
-              required
-            />
-            <input
-              type="number"
-              name="paycheckAmount"
-              placeholder="Last Paycheck Amount"
-              value={formData.paycheckAmount}
-              onChange={handleInputChange}
-              required
-            />
-            <button type="submit">Submit</button>
-          </form>
-        )}
-      </div>
-    );
-  }
 
   // Calculate amounts
   const essentialBudget = (paycheck * 0.5).toFixed(2); // 50% of paycheck
@@ -201,26 +146,30 @@ const BudgetProgress = () => {
       })}
   
       {/* Display Suggested Savings */}
-      <div style={{ marginBottom: "20px", fontSize: "16px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>Suggested Savings</span>
-          <span style={{ color: "#42c982" }}>
-            ${parseFloat(suggestedSavings).toLocaleString()}
-          </span>
-        </div>
-      </div>
+      <div style={{ marginBottom: "20px" }}>
+        <DataRow title={"Suggested Savings"} money={suggestedSavings}></DataRow>
+      </div>  
   
       {/* Display Actual Savings */}
       <div style={{ fontSize: "16px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>Actual Savings</span>
-          <span style={{ color: actualSavingsColor }}>
-            ${parseFloat(actualSavings).toLocaleString()}
-          </span>
-        </div>
+        <DataRow title={"Actual Savings"} money={actualSavings}></DataRow>
       </div>
     </div>
   );
 };
 
+function DataRow(props)
+{
+  return(
+    <>
+      <div style={{ display: "flex", justifyContent: "space-between",fontSize: "16px" }}>
+          <span>{props.title}</span>
+          <span style={{ color: "#42c982" }}>
+            ${parseFloat(props.money).toLocaleString()}
+          </span>
+        </div>
+    </>
+
+  )
+}
 export default BudgetProgress;
