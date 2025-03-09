@@ -51,21 +51,6 @@ const BudgetProgress = () => {
     return (remaining / budget) * 100; // Calculate percentage of remaining amount
   };
 
-  // Determine if thumbs up or thumbs down should be shown
-  const getThumbsIcon = (spent, budget) => {
-    const iconStyle = {
-      color: spent > budget ? "red" : "green",
-      fontSize: "20px",
-      position: "relative",
-      top: "-25px", // Adjust for alignment
-    };
-
-    if (spent > budget) {
-      return <FaThumbsDown style={iconStyle} />;
-    }
-    return <FaThumbsUp style={iconStyle} />;
-  };
-
   return (
     <div style={{ width: "100%", padding: "1px" }}>
       <div style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "20px" }}>
