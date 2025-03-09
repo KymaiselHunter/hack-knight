@@ -48,25 +48,21 @@ const BudgetProgress = () => {
         Last Paycheck: ${paycheck.toLocaleString()}
       </div>
   
-      {data.map((item) => {
-        let totalAmount = 0;
-        let spent = 0;
-        let remaining = 0;
-  
-        if (item.category === "Essential Budget") {
-          totalAmount = essentialBudget;
-          spent = spentEssential;
-          remaining = remainingEssential;
-        } else if (item.category === "Non-Essential Budget") {
-          totalAmount = nonEssentialBudget;
-          spent = spentNonEssential;
-          remaining = remainingNonEssential;
-        }
-        return(
-          <ProgressBar category={item.category} spent={spent} totalAmount={totalAmount} color={item.color} remaining={remaining}/>
-        );
-        
-      })}
+      <ProgressBar 
+        category={data[0].category} 
+        spent={spentEssential} 
+        totalAmount={essentialBudget}
+        color={data[0].color}
+        remaining={remainingEssential}  
+      ></ProgressBar>
+      
+      <ProgressBar 
+        category={data[1].category} 
+        spent={spentNonEssential} 
+        totalAmount={nonEssentialBudget}
+        color={data[1].color}
+        remaining={remainingNonEssential}  
+      ></ProgressBar>
   
       {/* Display Suggested Savings */}
       <div style={{ marginBottom: "20px" }}>
@@ -107,7 +103,7 @@ function Thumb(props)
       position: "relative",
       top: "-25px", // Adjust for alignment
     };
-    return <FaThumbsDown style={iconStyle} />;
+    return <FaThumbsUp style={iconStyle} />;
   }
   else
   {
