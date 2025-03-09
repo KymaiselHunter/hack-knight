@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaThumbsUp, FaThumbsDown } from "react-icons/fa"; // Import Font Awesome icons
 
-const API_KEY = ""; // Replace with your Nessie API Key
+const API_KEY = "f16bc2e1472450db774a644673f06a3f"; // Replace with your Nessie API Key
 
 const data = [
   { 
@@ -26,75 +26,6 @@ const BudgetProgress = () => {
     address: "",
     paycheckAmount: ""
   });
-
-  useEffect(() => {
-    const savedCustomer = JSON.parse(localStorage.getItem("customer"));
-    if (savedCustomer) {
-      setFormData(savedCustomer);
-      setPaycheck(savedCustomer.paycheckAmount);
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
-  }, []);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const depositPaycheck = async (amount) => {
-    try {
-      const response = await fetch("YOUR_BACKEND_API_ENDPOINT/deposit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paycheck: amount }),
-      });
-
-      if (response.ok) {
-        console.log("Paycheck deposited successfully");
-      } else {
-        console.error("Failed to deposit paycheck");
-      }
-    } catch (error) {
-      console.error("Error depositing paycheck:", error);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch(
-        `http://api.nessieisreal.com/customers?key=${API_KEY}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            address: { street_number: formData.address },
-          }),
-        }
-      );
-      const customer = await response.json();
-      alert("Customer created successfully!");
-
-      const customerData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        address: formData.address,
-        paycheckAmount: parseFloat(formData.paycheckAmount),
-      };
-
-      localStorage.setItem("customer", JSON.stringify(customerData));
-
-      setPaycheck(parseFloat(formData.paycheckAmount));
-      depositPaycheck(parseFloat(formData.paycheckAmount));
-      setShowForm(false);
-    } catch (error) {
-      console.error("Failed to create customer:", error);
-    }
-  };
 
   useEffect(() => {
     if (paycheck > 0) {
@@ -290,7 +221,6 @@ const BudgetProgress = () => {
       </div>
     </div>
   );
-  
 };
 
 export default BudgetProgress;
