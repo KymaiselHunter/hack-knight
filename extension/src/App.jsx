@@ -23,6 +23,9 @@ function App() {
   const [spentNeeds, setSpentNeeds] = useState(0);
   const [spentWants, setSpentWants] = useState(0);
 
+  const [allCustomers, setAllCustomers] = useState([]);
+
+
   // Chrome extension: get Amazon product details
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -237,6 +240,14 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    async function loadCustomers() {
+      const customers = await getNessieCustomers();  // Assuming getNessieCustomers() is defined and returns an array
+      setAllCustomers(customers);
+    }
+    loadCustomers();
+  }, []);
+
   // --- UI Rendering ---
   return (
     <>
@@ -253,9 +264,40 @@ function App() {
       <button onClick={callGPT}>
         activate gpt
       </button>
+
+      <CustomerList customers={allCustomers} onSelectCustomer={grabNewCustomer} />
+
     </>
   );
 }
+
+// New CustomerList component
+function CustomerList({ customers, onSelectCustomer }) {
+  return (
+    <div style={{ margin: '20px 0' }}>
+      <h2>Customers</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {customers.map(customer => (
+          <div
+            key={customer._id}
+            style={{
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              padding: '8px',
+              cursor: 'pointer',
+              width: '100%',
+              //backgroundColor: '#f9f9f9'
+            }}
+            onClick={() => onSelectCustomer(customer._id)}
+          >
+            {customer.name}dssgfs
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 
 function ChatBot(props) {
   return (
