@@ -1,29 +1,38 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-
-
+import { useState, useEffect } from 'react';
+import reactLogo from './assets/react.svg';
+import viteLogo from '/vite.svg';
 import BudgetProgress from './components/BudgetChart';
-
-import './App.css'
+import './App.css';
 
 function App() {
-  const [tabURL, setTabURL] = useState()
-  const [productName, setProductName] = useState()
+  // Amazon product state
+  const [tabURL, setTabURL] = useState();
+  const [productName, setProductName] = useState();
   const [productDescription, setProductDescription] = useState('');
   const [productPrice, setProductPrice] = useState('');
   const [isAmazonProductPage, setIsAmazonProductPage] = useState(false);
 
+  // GPT state
+  const [chatResponse, setChatResponse] = useState("No GPT");
+
+  // Nessie state
+  const [currentCustomer, setCurrentCustomer] = useState(null);
+  const [currentAccounts, setCurrentAccounts] = useState([]);
+  const [currentTotalDeposit, setCurrentTotalDeposit] = useState(0);
+  const [currentSaved, setCurrentSaved] = useState(0);
+  const [spentNeeds, setSpentNeeds] = useState(0);
+  const [spentWants, setSpentWants] = useState(0);
+
+  // Chrome extension: get Amazon product details
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length > 0) {
         const url = tabs[0].url;
-        setTabURL(url);//dont really need this? do i remove?
+        setTabURL(url);
 
         if (url.includes("amazon.com") && (url.includes("/dp/") || url.includes("/gp/product/"))) {
           setIsAmazonProductPage(true);
 
-          // Run a script inside the Amazon page to get product details
           chrome.scripting.executeScript({
             target: { tabId: tabs[0].id },
             func: () => {
@@ -31,22 +40,16 @@ function App() {
                 const el = document.querySelector(selector);
                 return el ? el.innerText.trim() : null;
               };
-
               const title = getText("#productTitle") || "No product title found";
-
-              // Try multiple locations for description
               const description = getText("#productDescription") ||
                                   getText("#feature-bullets") ||
                                   getText("#productOverview_feature_div") ||
                                   "No description available";
-
-              // Get price from different possible locations
               const price = getText("#priceblock_ourprice") ||
                             getText("#priceblock_dealprice") ||
                             getText(".a-price .a-offscreen") ||
                             "Price not found";
-
-              return { title, description, price};
+              return { title, description, price };
             }
           }, (results) => {
             if (results && results[0] && results[0].result) {
@@ -55,7 +58,6 @@ function App() {
               setProductPrice(results[0].result.price);
             }
           });
-
         } else {
           setIsAmazonProductPage(false);
         }
@@ -63,25 +65,19 @@ function App() {
     });
   }, []);
 
-
-  const [chatResponse, setChatResponse] = useState("No GPT")
+  // --- GPT Function ---
   async function callGPT() {
     try {
-      // The user’s prompt (could come from an input field in your popup)
       const userPrompt = 'Hello, GPT from Chrome extension!';
-  
       const response = await fetch('http://localhost:3001/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userPrompt })
       });
-  
       const data = await response.json();
       if (data.aiResponse) {
         console.log('AI response:', data.aiResponse);
-        setChatResponse(data.aiResponse)
+        setChatResponse(data.aiResponse);
       } else {
         console.error('Error from server:', data.error);
       }
@@ -89,243 +85,184 @@ function App() {
       console.error('Fetch error:', err);
     }
   }
-  const [currentCustomer, setCurrentCustomerID] = useState("67cb4ca29683f20dd518d06c")
-  const [customersData, setCurrentCustomer] = useState()
-  const [currentAccounts, setCurrentAccounts] = useState([])
-  const [currentDeposits, setCurrentDeposits] = useState([])
-  const [currentPurchases, setCurrentPurchases] = useState([])
-  
-  const [currentTotalDeposit, setCurrentTotalDeposit] = useState(0)
-  const [currentSaved, setCurrentSaved] = useState(0)
-  const [spentNeeds, setSpentNeeds] = useState(0)
-  const [spentWants, setSpentWants] = useState(0)
 
-  function resetCustomerData()
-  {
-    setCurrentTotalDeposit(0)
-    setCurrentSaved(0)
-
-    setSpentNeeds(0)
-    setSpentWants(0)
-  }
-
-  async function grabNewCustomer(customerID)
-  {
-    await callNessieCustomer(customerID)
-    await callNessieAccounts(customerID)
-    
-    for(let i = 0; i < currentAccounts.length; i++)
-    {
-      await callNessieDeposits(currentAccounts[i]._id)
-
-      for(let j = 0; j < currentDeposits.length; j++)
-      {
-        setCurrentTotalDeposit(currentTotalDeposit+currentAccounts[j].amount)
-      }
-
-      await callNessiePurchases(currentAccounts[i]._id)
-
-      setCurrentSaved(currentTotalDeposit)
-      for(let j=0; j < currentPurchases.length;j++)
-      {
-        setCurrentSaved(currentSaved-currentPurchases[j].amount)
-
-        if (currentPurchases[j].description.includes("essential")) {
-          setSpentNeeds(spentNeeds+currentPurchases[j].amount)
-        } 
-        
-        if (currentPurchases[j].description.includes("non-essential")) {
-          setSpentWants(spentWants+currentPurchases[j].amount)
-        } 
-      }
-
-    }
-    console.log('total dep:', currentTotalDeposit)
-    console.log('cur saved', currentSaved)
-    console.log('spent needs', spentNeeds)
-    console.log('spent wantts', spentWants)
-  }
-  
-  async function callNessieCustomers() {
+  // --- Nessie "get" functions: they return data directly ---
+  async function getNessieCustomers() {
     try {
       const response = await fetch('http://localhost:3001/api/nessie/customers', {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
-      const data = await response.json();
-      if (data.customers) {
-        console.log('Customers data:', data.customers);
-        // Update your UI or state with the fetched customer data
-        setCustomersData(data.customers);
-      } else {
-        console.error('No data returned from Nessie endpoint.');
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
       }
+      const data = await response.json();
+      return data.customers || [];
     } catch (err) {
-      console.error('Fetch error:', err);
+      console.error('Fetch error (customers):', err);
+      return [];
     }
-  } 
-  
-  async function callNessieCustomer(customerID) {
+  }
+
+  async function getNessieCustomer(customerID) {
     try {
       const response = await fetch(`http://localhost:3001/api/nessie/customers/${customerID}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
-  
       if (!response.ok) {
-        console.error('Server error:', response.status, response.statusText);
-        return;
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
       }
-  
       const data = await response.json();
-      if (data.customer) {
-        console.log('Customer data:', data.customer);
-        setCurrentCustomer(data.customer);
-      } else {
-        console.error('No data returned from Nessie endpoint.');
-      }
+      return data.customer || null;
     } catch (err) {
-      console.error('Fetch error:', err);
+      console.error('Fetch error (customer):', err);
+      return null;
     }
   }
-  
-  async function callNessieAccounts(userID) {
+
+  async function getNessieAccounts(customerID) {
     try {
-      // Make sure you pass the ID in the URL, no body needed for a GET
-      const response = await fetch(`http://localhost:3001/api/nessie/customers/${userID}/accounts`, {
+      const response = await fetch(`http://localhost:3001/api/nessie/customers/${customerID}/accounts`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
-
-      // If the server responded with an error (e.g., 500), handle it
       if (!response.ok) {
-        console.error('Server error:', response.status, response.statusText);
-        return;
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
       }
-
       const data = await response.json();
-      if (data.accounts) {
-        console.log('Accounts data:', data.accounts);
-        setCurrentAccounts(data.accounts);
-      } else {
-        console.error('No data returned from Nessie endpoint.');
-      }
+      return data.accounts || [];
     } catch (err) {
-      console.error('Fetch error:', err);
+      console.error('Fetch error (accounts):', err);
+      return [];
     }
   }
-  
-  
-  
-    async function callNessieDeposits(accountID) {
-      try {
-        // Make sure you pass the ID in the URL, no body needed for a GET
-        const response = await fetch(`http://localhost:3001/api/nessie/accounts/${accountID}/deposits`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
+
+  async function getNessieDeposits(accountID) {
+    try {
+      const response = await fetch(`http://localhost:3001/api/nessie/accounts/${accountID}/deposits`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data.deposits || [];
+    } catch (err) {
+      console.error('Fetch error (deposits):', err);
+      return [];
+    }
+  }
+
+  async function getNessiePurchases(accountID) {
+    try {
+      const response = await fetch(`http://localhost:3001/api/nessie/accounts/${accountID}/purchases`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data.purchases || [];
+    } catch (err) {
+      console.error('Fetch error (purchases):', err);
+      return [];
+    }
+  }
+
+  // Helper: reset local state
+  function resetCustomerData() {
+    setCurrentTotalDeposit(0);
+    setCurrentSaved(0);
+    setSpentNeeds(0);
+    setSpentWants(0);
+    setCurrentAccounts([]);
+    setCurrentCustomer(null);
+  }
+
+  // --- Master function: fetch customer info, accounts, deposits & purchases, then calculate totals ---
+  async function grabNewCustomer(customerID) {
+    try {
+      resetCustomerData();
+
+      // 1. Fetch the customer and accounts
+      const customer = await getNessieCustomer(customerID);
+      const accounts = await getNessieAccounts(customerID);
+
+      // 2. Prepare local counters
+      let totalDeposits = 0;
+      let totalSpentNeeds = 0;
+      let totalSpentWants = 0;
+      let totalPurchases = 0;
+
+      // 3. Loop through each account and fetch deposits and purchases
+      for (const account of accounts) {
+        const deposits = await getNessieDeposits(account._id);
+        deposits.forEach(d => {
+          totalDeposits += d.amount;
+        });
+
+        const purchases = await getNessiePurchases(account._id);
+        purchases.forEach(p => {
+          totalPurchases += p.amount;
+          if (p.description.includes('essential')) {
+            totalSpentNeeds += p.amount;
+          } else if (p.description.includes('non-essential')) {
+            totalSpentWants += p.amount;
           }
         });
-  
-        // If the server responded with an error (e.g., 500), handle it
-        if (!response.ok) {
-          console.error('Server error:', response.status, response.statusText);
-          return;
-        }
-  
-        const data = await response.json();
-        if (data.deposits) {
-          console.log('Deposits data:', data.deposits);
-          setCurrentDeposits(data.deposits);
-        } else {
-          console.error('No data returned from Nessie endpoint.');
-        }
-      } catch (err) {
-        console.error('Fetch error:', err);
       }
-    }
-  
 
-async function callNessiePurchases(accountID) {
-  try {
-    const response = await fetch(`http://localhost:3001/api/nessie/accounts/${accountID}/purchases`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+      // 4. Calculate the "saved" amount (total deposits minus total purchases)
+      const saved = totalDeposits - totalPurchases;
 
-    if (!response.ok) {
-      console.error('Server error:', response.status, response.statusText);
-      return;
-    }
+      // 5. Update React state once with all the data
+      setCurrentCustomer(customer);
+      setCurrentAccounts(accounts);
+      setCurrentTotalDeposit(totalDeposits);
+      setCurrentSaved(saved);
+      setSpentNeeds(totalSpentNeeds);
+      setSpentWants(totalSpentWants);
 
-    const data = await response.json();
-    if (data.purchases) {
-      console.log('Purchases data:', data.purchases);
-      setCurrentPurchases(data.purchases);
-    } else {
-      console.error('No data returned from Nessie endpoint.');
+      console.log('Customer:', customer);
+      console.log('Accounts:', accounts);
+      console.log('Total deposits:', totalDeposits);
+      console.log('Spent (needs):', totalSpentNeeds);
+      console.log('Spent (wants):', totalSpentWants);
+      console.log('Saved:', saved);
+    } catch (error) {
+      console.error('Error in grabNewCustomer:', error);
     }
-  } catch (err) {
-    console.error('Fetch error:', err);
   }
-}
 
-
+  // --- UI Rendering ---
   return (
     <>
-    
-          <BudgetProgress />
+      <BudgetProgress />
       <div>
-        <button onClick={()=>callNessieCustomers()}></button>
-        <button onClick={()=>callNessieAccounts("67cb4ca29683f20dd518d06c")}></button>
-        <button onClick={()=>callNessieDeposits("67cb5dd99683f20dd518d13b")}></button>
-        <button onClick={()=>callNessiePurchases("67cb5dd99683f20dd518d13b")}></button>
-        <button onClick={()=>grabNewCustomer(currentCustomer)}>test</button>
+        <button onClick={() => grabNewCustomer("67cb4ca29683f20dd518d06c")}>
+          Test Grab New Customer
+        </button>
       </div>
       <div>
-        <ChatBot chatResponse={chatResponse}></ChatBot>
+        <ChatBot chatResponse={chatResponse} />
       </div>
       <h1>======</h1>
-
       <button onClick={callGPT}>
         activate gpt
       </button>
     </>
-  )
+  );
 }
 
-function ChatBot(props)
-{
-  return(
+function ChatBot(props) {
+  return (
     <>
-       <h1>{props.chatResponse}</h1>
+      <h1>{props.chatResponse}</h1>
     </>
-  )
+  );
 }
 
-
-
-export default App
-
-
-//kyle's reference code
-//const [count, setCount] = useState(0)
-
-//const colorButton = async () => {
-//  let [tab] = await chrome.tabs.query({active: true});
-//  chrome.scripting.executeScript({
-//    target: {tabId: tab.id},
-//    func: () => {
-//      alert('fdsoigjodg')
-//    }
-//  });
-//}
-
+export default App;
