@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+.Criteria-Container{
+    margin-top:25px;
+    padding:5px;
+    width: auto;
+    height: 250px;
+    border: 1px solid rgb(230, 2, 255);
+    background-color: #F1F5FB;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items:  center;
+    gap:10px
+
+}
+.subCriteria-Container{
+    width:100%;
+    height:60px;
+    background-color:  #ffffff;
+    border: 1px solid rgb(230, 2, 255);
+    border-radius: 15px;
+    display: flex;
+
+    flex-direction: column;
+    align-items:  center;
+    justify-content: center;
+    
+}
+.Criteria-Header
+{
+    color: black;
+    margin-left:5px;
+    padding:0 ;
+    align-self: flex-start; 
+    font-weight: bold;
+    font-family: "Inter",sans-serif;
+    font-size: 20px;
+}
+.Criteria-Title
+{
+    font-family: "Inter",sans-serif;
+    color: #9299A6;
+    font-size:10px;
+    padding: 0;
+    margin: 0;
+    font-weight: bold;
+}
+.Criteria-P
+{
+    font-family: "Inter",sans-serif;
+    color: #9299A6;
+    font-size:10px;
+    padding: 0;
+    margin: 0;
+    font-weight: bold;
+    align-self: flex-start;
+}
+.Criteria-Allocated-Income-P
+{
+    font-size:20px;
+    color: #3FDB77;
+    margin:0px;
+    padding: 0px;
+    font-weight: bold;
+    align-self: flex-start;
+
+}
+.subCriteria-Content
+{
+    display: flex;
+    flex-direction: row;
+    border: 1px solid rgb(230, 2, 255);
+    align-items: center;
+    gap:10px;
+    width: 100%;
+    justify-content: space-between; /* ✅ Ensures text on the left, check on the right */
+    box-sizing: border-box;
+    padding: 5px 15px;
+}
