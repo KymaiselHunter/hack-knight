@@ -2,19 +2,6 @@ import React, { useEffect, useState } from "react";
 import ProgressBar from "./ProgressBar";
 import DataRow from "./DataRow";
 
-const data = [
-  { 
-    category: "Essential Budget", 
-    percentage: 50, // 50% for Essential
-    color: "#f99bab" 
-  },
-  { 
-    category: "Non-Essential Budget", 
-    percentage: 30, // 30% for Non-Essential
-    color: "#f99bab" 
-  },
-];
-
 const BudgetProgress = () => {
   const [paycheck, setPaycheck] = useState({
     firstName: "",
@@ -48,18 +35,18 @@ const BudgetProgress = () => {
       </div>
   
       <ProgressBar 
-        category={data[0].category} 
+        category={"Essential Budget"} 
         spent={spentEssential} 
         totalAmount={essentialBudget}
-        color={data[0].color}
+        color={"#f99bab"}
         remaining={remainingEssential}  
       ></ProgressBar>
       
       <ProgressBar 
-        category={data[1].category} 
+        category={"Non-Essential Budget"} 
         spent={spentNonEssential} 
         totalAmount={nonEssentialBudget}
-        color={data[1].color}
+        color={"#f99bab" }
         remaining={remainingNonEssential}  
       ></ProgressBar>
   

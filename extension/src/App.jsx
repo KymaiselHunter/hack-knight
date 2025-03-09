@@ -89,10 +89,21 @@ function App() {
       console.error('Fetch error:', err);
     }
   }
-
   const [currentCustomer, setCurrentCustomer] = useState("67cb4ca29683f20dd518d06c")
   const [customersData, setCustomersData] = useState([])
+  const [currentAccounts, setCurrentAccounts] = useState([])
+  const [currentDeposits, setCurrentDeposits] = useState([])
+  const [currentPurchases, setCurrentPurchases] = useState([])
+  
+  const [currentTotalDeposit, setCurrentTotalDeposit] = useState(0)
+  const [currentSaved, setCurrentSaved] = useState(0)
 
+  function resetCustomerData()
+  {
+    setCurrentTotalDeposit(0)
+    setCurrentSaved(0)
+  }
+  
   async function callNessieCustomers() {
     try {
       const response = await fetch('http://localhost:3001/api/nessie/customers', {
@@ -113,8 +124,7 @@ function App() {
       console.error('Fetch error:', err);
     }
   } 
-
-  const [currentAccounts, setCurrentAccounts] = useState([])
+  
 
   async function callNessieAccounts(userID) {
     try {
@@ -145,7 +155,6 @@ function App() {
   }
   
   
-    const [currentDeposits, setCurrentDeposits] = useState([])
   
     async function callNessieDeposits(accountID) {
       try {
@@ -166,7 +175,7 @@ function App() {
         const data = await response.json();
         if (data.deposits) {
           console.log('Deposits data:', data.deposits);
-          //setCurrentDeposits(data.deposits);
+          setCurrentDeposits(data.deposits);
         } else {
           console.error('No data returned from Nessie endpoint.');
         }
@@ -193,6 +202,7 @@ async function callNessiePurchases(accountID) {
     const data = await response.json();
     if (data.purchases) {
       console.log('Purchases data:', data.purchases);
+      setCurrentPurchases(data.purchases);
     } else {
       console.error('No data returned from Nessie endpoint.');
     }
@@ -220,22 +230,6 @@ async function callNessiePurchases(accountID) {
       <button onClick={callGPT}>
         activate gpt
       </button>
-
-      <AmazonItem 
-        isAmazonProductPage={isAmazonProductPage}
-        productName={productName} 
-        productDescription={productDescription} 
-        productPrice={productPrice}>
-      </AmazonItem>
-      <div className="card">
-
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
@@ -249,22 +243,7 @@ function ChatBot(props)
   )
 }
 
-function AmazonItem(props)
-{
-  const productMessage = 
-  <>
-    <h1>product detected</h1>
-    <ul>
-      {[props.productName, props.productDescription, props.productPrice].map((item, index) => (
-        <li key={index}>{item}</li>
-      ))}
-    </ul>
-  
-  </>
 
-  const noProductMessage = <h1>no product detected</h1>
-  return(props.isAmazonProductPage ? productMessage : noProductMessage )
-}
 
 export default App
 
