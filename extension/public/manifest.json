@@ -1,7 +1,7 @@
 {
     "manifest_version" : 3,
     "version" : "1.0.0",
-    "name" : "My Vite Extension",
+    "name" : "Budget Breakdown",
     "action" : {
         "default_popup" : "index.html"
     },
@@ -10,12 +10,9 @@
         "tabs",
         "activeTab"
     ],
-    "host_permissions": [
-        "https://*/*",
-        "https://*/*"
-    ],
+    "host_permissions": ["https://www.amazon.com/*","http://localhost:3001/*"],
     "icons": {
         "32" : "icon32.png"
     }
-
-}
+  }
+  

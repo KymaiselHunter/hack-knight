@@ -1,40 +1,143 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+
+
+import BudgetProgress from './components/BudgetChart';
+
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [tabURL, setTabURL] = useState()
+  const [productName, setProductName] = useState()
+  const [productDescription, setProductDescription] = useState('');
+  const [productPrice, setProductPrice] = useState('');
+  const [isAmazonProductPage, setIsAmazonProductPage] = useState(false);
 
-  const colorButton = async () => {
-    let [tab] = await chrome.tabs.query({active: true});
-    chrome.scripting.executeScript({
-      target: {tabId: tab.id},
-      func: () => {
-        let color = document.body.style.backgroundColor
-        alert('fdsoigjodg', color)
+  useEffect(() => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length > 0) {
+        const url = tabs[0].url;
+        setTabURL(url);//dont really need this? do i remove?
+
+        if (url.includes("amazon.com") && (url.includes("/dp/") || url.includes("/gp/product/"))) {
+          setIsAmazonProductPage(true);
+
+          // Run a script inside the Amazon page to get product details
+          chrome.scripting.executeScript({
+            target: { tabId: tabs[0].id },
+            func: () => {
+              const getText = (selector) => {
+                const el = document.querySelector(selector);
+                return el ? el.innerText.trim() : null;
+              };
+
+              const title = getText("#productTitle") || "No product title found";
+
+              // Try multiple locations for description
+              const description = getText("#productDescription") ||
+                                  getText("#feature-bullets") ||
+                                  getText("#productOverview_feature_div") ||
+                                  "No description available";
+
+              // Get price from different possible locations
+              const price = getText("#priceblock_ourprice") ||
+                            getText("#priceblock_dealprice") ||
+                            getText(".a-price .a-offscreen") ||
+                            "Price not found";
+
+              return { title, description, price};
+            }
+          }, (results) => {
+            if (results && results[0] && results[0].result) {
+              setProductName(results[0].result.title);
+              setProductDescription(results[0].result.description);
+              setProductPrice(results[0].result.price);
+            }
+          });
+
+        } else {
+          setIsAmazonProductPage(false);
+        }
       }
     });
+  }, []);
+
+
+  const [chatResponse, setChatResponse] = useState("No GPT")
+  async function callGPT() {
+    try {
+      // The user’s prompt (could come from an input field in your popup)
+      const userPrompt = 'Hello, GPT from Chrome extension!';
+  
+      const response = await fetch('http://localhost:3001/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userPrompt })
+      });
+  
+      const data = await response.json();
+      if (data.aiResponse) {
+        console.log('AI response:', data.aiResponse);
+        setChatResponse(data.aiResponse)
+      } else {
+        console.error('Error from server:', data.error);
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+    }
   }
 
+
+  const [customersData, setCustomersData] = useState([])
+
+  async function callNessieCustomers() {
+    try {
+      const response = await fetch('http://localhost:3001/api/nessie/customers', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (data.customers) {
+        console.log('Customers data:', data.customers);
+        // Update your UI or state with the fetched customer data
+        setCustomersData(data.customers);
+      } else {
+        console.error('No data returned from Nessie endpoint.');
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+    }
+  } 
+  
   return (
     <>
+    
+          <BudgetProgress />
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <button onClick={callNessieCustomers}></button>
       </div>
-      <h1>Vite + React</h1>
+      <div>
+        <ChatBot chatResponse={chatResponse}></ChatBot>
+      </div>
+      <h1>======</h1>
+
+      <button onClick={callGPT}>
+        activate gpt
+      </button>
+
+      <AmazonItem 
+        isAmazonProductPage={isAmazonProductPage}
+        productName={productName} 
+        productDescription={productDescription} 
+        productPrice={productPrice}>
+      </AmazonItem>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <button onClick={colorButton}>
-          count is {count}
-        </button>
+
         <p>
           Edit <code>src/App.jsx</code> and save to test HMR
         </p>
@@ -46,4 +149,45 @@ function App() {
   )
 }
 
+function ChatBot(props)
+{
+  return(
+    <>
+       <h1>{props.chatResponse}</h1>
+    </>
+  )
+}
+
+function AmazonItem(props)
+{
+  const productMessage = 
+  <>
+    <h1>product detected</h1>
+    <ul>
+      {[props.productName, props.productDescription, props.productPrice].map((item, index) => (
+        <li key={index}>{item}</li>
+      ))}
+    </ul>
+  
+  </>
+
+  const noProductMessage = <h1>no product detected</h1>
+  return(props.isAmazonProductPage ? productMessage : noProductMessage )
+}
+
 export default App
+
+
+//kyle's reference code
+//const [count, setCount] = useState(0)
+
+//const colorButton = async () => {
+//  let [tab] = await chrome.tabs.query({active: true});
+//  chrome.scripting.executeScript({
+//    target: {tabId: tab.id},
+//    func: () => {
+//      alert('fdsoigjodg')
+//    }
+//  });
+//}
+
