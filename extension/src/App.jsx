@@ -175,6 +175,33 @@ function App() {
       }
     }
   
+
+async function callNessiePurchases(accountID) {
+  try {
+    const response = await fetch(`http://localhost:3001/api/nessie/accounts/${accountID}/purchases`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      console.error('Server error:', response.status, response.statusText);
+      return;
+    }
+
+    const data = await response.json();
+    if (data.purchases) {
+      console.log('Purchases data:', data.purchases);
+    } else {
+      console.error('No data returned from Nessie endpoint.');
+    }
+  } catch (err) {
+    console.error('Fetch error:', err);
+  }
+}
+
+
   return (
     <>
     
@@ -183,6 +210,7 @@ function App() {
         <button onClick={()=>callNessieCustomers()}></button>
         <button onClick={()=>callNessieAccounts("67cb4ca29683f20dd518d06c")}></button>
         <button onClick={()=>callNessieDeposits("67cb5dd99683f20dd518d13b")}></button>
+        <button onClick={()=>callNessiePurchases("67cb5dd99683f20dd518d13b")}></button>
       </div>
       <div>
         <ChatBot chatResponse={chatResponse}></ChatBot>

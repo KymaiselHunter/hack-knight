@@ -116,6 +116,34 @@ app.get('/api/nessie/accounts/:id/deposits', async (req, res) => {
 });
 
 
+// GET /api/nessie/accounts/:id/purchases
+app.get('/api/nessie/accounts/:id/purchases', async (req, res) => {
+  try {
+    // Extract the account ID from the route parameters
+    const accountID = req.params.id;
+    
+    // Build the Nessie URL (e.g., https://api.nessieisreal.com/accounts/{id}/purchases?key=YOUR_KEY)
+    const url = `${nessieBaseUrl}/accounts/${accountID}/purchases?key=${nessieApiKey}`;
+
+    // Fetch the purchases data from Nessie
+    const response = await fetch(url);
+
+    // If the remote service returned a non-2xx status, throw an error
+    if (!response.ok) {
+      throw new Error(`Nessie API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    // Parse the JSON response from Nessie
+    const data = await response.json();
+
+    // Return the fetched purchases data to the client
+    res.json({ purchases: data });
+  } catch (error) {
+    // Return a 500 if anything goes wrong
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log('Server listening on ' + PORT));
