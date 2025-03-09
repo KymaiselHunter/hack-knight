@@ -1,47 +1,25 @@
-//import dotenv from 'dotenv';
-//import OpenAI from 'openai';
-
-
 // server.js
-//dotenv.config();
 require('dotenv').config();
 const OpenAI = require('openai');
 
 const express = require('express');
 const cors = require('cors');
-//const { Configuration, OpenAIApi } = require('openai');
+
+const fetch = require('node-fetch'); // This module lets Node.js make HTTP requests
+
+//set up express
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// GPT Key
 const OpenAI_Api = process.env.OPENAI_API_KEY || 'Mykey';
 
 const openai = new OpenAI({
   apiKey: OpenAI_Api
 });
 
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-//const configuration = new Configuration({
-//  apiKey: process.env.OPENAI_API_KEY,
-//});
-//const openai = new OpenAIApi(configuration);
-
-//app.post('/api/chat', async (req, res) => {
-//  try {
-//    const { userPrompt } = req.body;
-//    const response = await openai.createChatCompletion({
-//      model: 'gpt-3.5-turbo',
-//      messages: [
-//        { role: 'system', content: 'You are a helpful assistant.' },
-//        { role: 'user', content: userPrompt }
-//      ],
-//    });
-//    res.json({ aiResponse: response.data.choices[0].message.content });
-//  } catch (error) {
-//    console.error(error);
-//    res.status(500).json({ error: error.message });
-//  }
-//});
+//GPT posts
 app.post('/api/chat', async (req, res) => {
   try {
       const { userPrompt } = req.body;
@@ -53,29 +31,90 @@ app.post('/api/chat', async (req, res) => {
       ],
     });
     res.json({ aiResponse: response.choices[0].message.content });
-    //console.log(chatCompletion.choices[0].message);
   } catch (error) {
-    //console.error('Error creating chat completion:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-//const createChatCompletion = async () => {
-//  try {
-//    const chatCompletion = await openai.chat.completions.create({
-//      model: 'gpt-3.5-turbo',
-//      messages: [
-//        { role: 'system', content: 'You are a helpful assistant.' },
-//        { role: 'user', content: userPrompt }
-//      ],
-//    });
-//    console.log(chatCompletion.choices[0].message);
-//  } catch (error) {
-//    console.error('Error creating chat completion:', error);
-//  }
-//};
 
-//createChatCompletion();
+
+//Nessie Key
+const nessieApiKey = process.env.NESSIE_API_KEY;
+const nessieBaseUrl = 'http://api.nessieisreal.com';
+
+//Nessie posts
+// Route to fetch account data from the Nessie API
+app.get('/api/nessie/customers', async (req, res) => {
+  try {
+    // Build the URL with your API key as a query parameter
+    //console.log("d")
+    const url = `${nessieBaseUrl}/customers?key=${nessieApiKey}`;
+    // Use node-fetch to send a GET request to the Nessie API endpoint
+    const response = await fetch(url);
+    const data = await response.json();
+
+    // Return the fetched data to the client
+    res.json({customers: data});
+  } catch (error) {
+    // Handle any errors that occur during the fetch operation
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log('Server listening on ' + PORT));
+
+
+////Kyle's reference code
+//// A map of "assistantStyle" => system messages
+//const systemMessages = {
+//  default: 'You are a helpful assistant.',
+//  british: 'You are a helpful British assistant.',
+//  // ...
+//};
+
+//app.post('/api/chat', async (req, res) => {
+//  try {
+//    const { userPrompt, assistantStyle } = req.body;
+
+//    // If assistantStyle is not recognized, default to "default" or throw an error
+//    const systemMessage = systemMessages[assistantStyle] || systemMessages.default;
+
+//    const response = await openai.chat.completions.create({
+//      model: 'gpt-3.5-turbo',
+//      messages: [
+//        { role: 'system', content: systemMessage },
+//        { role: 'user', content: userPrompt }
+//      ],
+//    });
+
+//    res.json({ aiResponse: response.choices[0].message.content });
+//  } catch (error) {
+//    res.status(500).json({ error: error.message });
+//  }
+//});
+
+//async function callGPT(userPrompt, assistantStyle = 'default') {
+//  try {
+//    const response = await fetch('http://localhost:3001/api/chat', {
+//      method: 'POST',
+//      headers: {
+//        'Content-Type': 'application/json'
+//      },
+//      body: JSON.stringify({ userPrompt, assistantStyle })
+//    });
+
+//    const data = await response.json();
+//    if (data.aiResponse) {
+//      console.log('AI response:', data.aiResponse);
+//      // Optionally update your UI with the received response:
+//      setChatResponse(data.aiResponse);
+//    } else {
+//      console.error('Error from server:', data.error);
+//    }
+//  } catch (err) {
+//    console.error('Fetch error:', err);
+//  }
+//}

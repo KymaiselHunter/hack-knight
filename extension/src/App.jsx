@@ -4,18 +4,6 @@ import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  const colorButton = async () => {
-    let [tab] = await chrome.tabs.query({active: true});
-    chrome.scripting.executeScript({
-      target: {tabId: tab.id},
-      func: () => {
-        alert('fdsoigjodg')
-      }
-    });
-  }
-
   const [tabURL, setTabURL] = useState()
   const [productName, setProductName] = useState()
   const [productDescription, setProductDescription] = useState('');
@@ -26,7 +14,7 @@ function App() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length > 0) {
         const url = tabs[0].url;
-        setTabURL(url);
+        setTabURL(url);//dont really need this? do i remove?
 
         if (url.includes("amazon.com") && (url.includes("/dp/") || url.includes("/gp/product/"))) {
           setIsAmazonProductPage(true);
@@ -71,6 +59,8 @@ function App() {
     });
   }, []);
 
+
+  const [chatResponse, setChatResponse] = useState("No GPT")
   async function callGPT() {
     try {
       // The user’s prompt (could come from an input field in your popup)
@@ -88,7 +78,6 @@ function App() {
       if (data.aiResponse) {
         console.log('AI response:', data.aiResponse);
         setChatResponse(data.aiResponse)
-        // Use data.aiResponse in your UI
       } else {
         console.error('Error from server:', data.error);
       }
@@ -97,10 +86,35 @@ function App() {
     }
   }
 
-  const [chatResponse, setChatResponse] = useState("No GPT")
+
+  const [customersData, setCustomersData] = useState([])
+
+  async function callNessieCustomers() {
+    try {
+      const response = await fetch('http://localhost:3001/api/nessie/customers', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (data.customers) {
+        console.log('Customers data:', data.customers);
+        // Update your UI or state with the fetched customer data
+        setCustomersData(data.customers);
+      } else {
+        console.error('No data returned from Nessie endpoint.');
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+    }
+  } 
   
   return (
     <>
+      <div>
+        <button onClick={callNessieCustomers}></button>
+      </div>
       <div>
         <ChatBot chatResponse={chatResponse}></ChatBot>
       </div>
@@ -156,3 +170,17 @@ function AmazonItem(props)
 }
 
 export default App
+
+
+//kyle's reference code
+//const [count, setCount] = useState(0)
+
+//const colorButton = async () => {
+//  let [tab] = await chrome.tabs.query({active: true});
+//  chrome.scripting.executeScript({
+//    target: {tabId: tab.id},
+//    func: () => {
+//      alert('fdsoigjodg')
+//    }
+//  });
+//}
