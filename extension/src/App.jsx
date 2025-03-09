@@ -286,10 +286,57 @@ function App() {
   // --- UI Rendering ---
   return (
     <>
-      <BudgetProgress currentTotalDeposit={currentTotalDeposit} spentNeeds={spentNeeds} spentWants={spentWants} />
-      <div>
-        <ChatBot chatResponse={chatResponse}></ChatBot>
+      
+      <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        maxHeight: '50vh',
+        margin: '0', // remove any outer margin
+
+      }}
+    >
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <div
+          style={{
+            padding: '20px',
+            border: '1px solid #ccc',
+            textAlign: 'center',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+<BudgetProgress currentTotalDeposit={currentTotalDeposit} spentNeeds={spentNeeds} spentWants={spentWants} />
+
+        </div>
       </div>
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <div
+          style={{
+            padding: '20px',
+            border: '1px solid #ccc',
+            textAlign: 'center',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <ChatBot chatResponse={chatResponse} />
+        </div>
+      </div>
+    </div>
+  );
 
     </>
   );
