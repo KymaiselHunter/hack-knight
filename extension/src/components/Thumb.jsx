@@ -3,7 +3,7 @@ import { FaThumbsUp, FaThumbsDown } from "react-icons/fa"; // Import Font Awesom
 function Thumb(props)
 {
   // // Determine if thumbs up or thumbs down should be shown
-  if(props.spent > props.budget)
+  if(props.spent < props.budget)
   {
     const iconStyle = {
       color: "green",

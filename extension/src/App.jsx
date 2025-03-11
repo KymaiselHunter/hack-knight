@@ -286,15 +286,31 @@ function App() {
   // --- UI Rendering ---
   return (
     <>
-      <BudgetProgress />
-      <div>
-        <button onClick={() => grabNewCustomer("67cb4ca29683f20dd518d06c")}>
-          Test Grab New Customer
-        </button>
+
+<BudgetProgress currentTotalDeposit={currentTotalDeposit} spentNeeds={spentNeeds} spentWants={spentWants} />
+
+
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <div
+          style={{
+            padding: '20px',
+            border: '1px solid #ccc',
+            textAlign: 'center',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <ChatBot chatResponse={chatResponse} />
+        </div>
       </div>
-      <div>
-        <ChatBot chatResponse={chatResponse}></ChatBot>
-      </div>
+
+
     </>
   );
 }
@@ -330,7 +346,7 @@ function App() {
 function ChatBot(props) {
   return (
     <>
-      <h1>{props.chatResponse}</h1>
+      <p>{props.chatResponse}</p>
     </>
   );
 }

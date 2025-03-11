@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+.userInfo
+{
+  color:black;
+  display: block;
+  font-family: "Inter",sans-serif;
+  font-weight: bold;
+  margin: auto
+
+}
+.userName
+{
+  
+  font-size:20px;
+  color:black;
+  text-align: center;
+
+  
+  
+
+}
+.userBudget
+{
+    font-size:28px;
+    color: #3FDB77;
+    margin-bottom: 0px;
+    font-weight: bold;
+}
+.budgetIcon {
+    color: #9299A6;
+    font-size: 10px;
+    margin-bottom: 1px;
+
+}
+
+.UserCard-Container
+{
+  vertical-align: top; 
+  height:110px;
+  width: 100%;
+  background-color: #F1F5FB;
+  border-radius: 15px;
+
+  border: 1px solid red;
+  display: flex;
+  justify-content: center; /* Centers children horizontally */
+  align-items: center; /* Centers children vertically */
+
+
+}
+.UserCard-WhiteBackGround
+{
+  height: 80px;
+  width: 470px;
+  background-color: #FFFF;
+  border-radius: 15px;
+  border: 1px solid red;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centers children horizontally */
+  align-items: center; /* Centers children vertically */
+
+}

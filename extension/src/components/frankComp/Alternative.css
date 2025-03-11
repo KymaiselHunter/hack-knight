@@ -1,0 +1,34 @@
+.Alternative-Header
+{
+    color: black;
+    margin-left:10px;
+    align-self: flex-start; 
+    font-weight: bold;
+    font-family: "Inter",sans-serif;
+    font-size: 20px;
+}
+.Alternative-Container{
+    margin-top:25px;
+    width: 100%;
+    height: 262px;
+    border: 1px solid rgb(230, 2, 255);
+    background-color: #F1F5FB;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items:  center;
+    gap:10px
+}
+
+.subAlternative-Container
+{
+    height: 200px;
+    width: 250px;
+    border-radius: 15px;
+    background-color: #FFFF;
+    padding: 5px 5px;
+}
+.textBox-Content{
+    color:black;
+}
